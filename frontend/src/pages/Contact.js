@@ -106,18 +106,18 @@ const Contact = () => {
               <div className="mt-8">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Follow Us</h3>
                 <div className="flex space-x-4">
-                  <a href="#" className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition duration-200">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition duration-200" aria-label="Follow us on Facebook">
                     <i className="fab fa-facebook-f"></i>
-                  </a>
-                  <a href="#" className="bg-blue-400 hover:bg-blue-500 text-white p-3 rounded-lg transition duration-200">
+                  </button>
+                  <button className="bg-blue-400 hover:bg-blue-500 text-white p-3 rounded-lg transition duration-200" aria-label="Follow us on Twitter">
                     <i className="fab fa-twitter"></i>
-                  </a>
-                  <a href="#" className="bg-pink-600 hover:bg-pink-700 text-white p-3 rounded-lg transition duration-200">
+                  </button>
+                  <button className="bg-pink-600 hover:bg-pink-700 text-white p-3 rounded-lg transition duration-200" aria-label="Follow us on Instagram">
                     <i className="fab fa-instagram"></i>
-                  </a>
-                  <a href="#" className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg transition duration-200">
+                  </button>
+                  <button className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg transition duration-200" aria-label="Follow us on YouTube">
                     <i className="fab fa-youtube"></i>
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

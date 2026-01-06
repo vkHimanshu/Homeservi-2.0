@@ -64,7 +64,7 @@ router.post('/register', [
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
@@ -116,7 +116,9 @@ router.post('/register-provider', [
       businessEmail,
       businessPhone,
       services,
-      experience
+      experience,
+      isVerified: true, // Auto-verify for demo purposes
+      availability: true // Set as available by default
     });
 
     await provider.save();
@@ -193,6 +195,100 @@ router.post('/login', [
         role: user.role
       }
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user profile
+router.put('/user/:id', async (req, res) => {
+  try {
+    const { firstName, lastName, phone } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { firstName, lastName, phone },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Forgot Password - Request Reset
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with that email address' });
+    }
+
+    // Generate reset token (6-digit code for simplicity)
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Set token and expiry (1 hour)
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // In production, send email here
+    // For development, return the token
+    res.json({
+      message: 'Password reset code generated',
+      resetToken, // Remove this in production!
+      email: user.email
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reset Password - Verify Token and Update Password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+      resetPasswordToken: resetToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset code' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    // Clear reset token
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successful. You can now login with your new password.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
